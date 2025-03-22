@@ -1,103 +1,109 @@
 import { RuleTester } from "@typescript-eslint/rule-tester";
-import { noInlineFunction } from "../rules/no-inline-function";
+import { noPlainQueryKeys } from "../rules/no-plain-query-keys";
 
 const ruleTester = new RuleTester({
   languageOptions: {
     parserOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
-      ecmaFeatures: {
-        jsx: true,
-      },
     },
   },
 });
 
-ruleTester.run("no-inline-function", noInlineFunction, {
+ruleTester.run("no-plain-query-keys", noPlainQueryKeys, {
   valid: [
     {
-      code: "const handleClick = () => {};", // Regular function declaration is fine
+      code: `
+        // Using query key factory is good
+        queryClient.setQueryData(userKeys.detail(1), data);
+      `,
     },
     {
       code: `
-        const handleSubmit = () => console.log('submit');
-        function Component() {
-          return <Button onClick={handleSubmit} />;
-        }
-      `, // Using function reference with component is good
+        // Using query key factory with multiple methods is good
+        queryClient.getQueryData(userKeys.all);
+        queryClient.invalidateQueries(userKeys.detail(5));
+        queryClient.refetchQueries(todoKeys.list(userId));
+      `,
     },
     {
       code: `
-        function Component() {
-          return <button onClick={() => alert('clicked')} />;
-        }
-      `, // Inline function on HTML element is allowed
+        // Not a queryClient method call
+        someOtherObject.setQueryData(['users'], data);
+      `,
     },
     {
       code: `
-        function Component() {
-          const handleChange = useCallback(() => {}, []);
-          return <Input onChange={handleChange} />;
-        }
-      `, // Using useCallback is good
+        // Different method that's not in our list
+        queryClient.someOtherMethod(['users']);
+      `,
     },
     {
       code: `
-        function Component() {
-          return <div onMouseOver={function() { console.log('hover') }} />;
-        }
-      `, // Function expression on HTML element is allowed
-    },
-    {
-      code: `
-        function Component() {
-          return <form onSubmit={(e) => e.preventDefault()} />;
-        }
-      `, // HTML elements with inline functions are fine
+        // Factory function call that returns an array (acceptable)
+        queryClient.invalidateQueries(createQueryKey('users', userId));
+      `,
     },
   ],
   invalid: [
     {
       code: `
-        function Component() {
-          return <Button onClick={() => console.log('clicked')} />;
-        }
-      `,
-      errors: [{ messageId: "noInlineFunction" }],
+    // Using spread operator - not a direct array literal
+    queryClient.setQueryData([...userKeys.detail(1), 'additional'], data);
+  `,
+      errors: [{ messageId: "noRawQueryKeys" }],
     },
     {
       code: `
-        function Component() {
-          return <CustomInput onChange={(e) => setValue(e.target.value)} />;
-        }
+        // Raw array as query key
+        queryClient.setQueryData(['users'], data);
       `,
-      errors: [{ messageId: "noInlineFunction" }],
+      errors: [{ messageId: "noRawQueryKeys" }],
     },
     {
       code: `
-        const Component = () => (
-          <Modal onClose={function() { 
-            setOpen(false);
-            resetForm();
-          }} />
-        );
+        // Raw array with multiple elements
+        queryClient.getQueryData(['users', 1, { sort: 'asc' }]);
       `,
-      errors: [{ messageId: "noInlineFunction" }],
+      errors: [{ messageId: "noRawQueryKeys" }],
     },
     {
       code: `
-        function Component() {
-          return (
-            <Form 
-              onSubmit={() => handleSubmit()}
-              onReset={() => resetForm()}
-            />
-          );
-        }
+        // Raw string as query key
+        queryClient.invalidateQueries('users');
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Multiple methods with raw query keys
+        queryClient.refetchQueries(['todos']);
+        queryClient.removeQueries(['users']);
+        queryClient.resetQueries(['settings']);
       `,
       errors: [
-        { messageId: "noInlineFunction" },
-        { messageId: "noInlineFunction" },
+        { messageId: "noRawQueryKeys" },
+        { messageId: "noRawQueryKeys" },
+        { messageId: "noRawQueryKeys" },
+      ],
+    },
+    {
+      code: `
+        // Complex raw arrays
+        queryClient.prefetchQuery(['users', { status: 'active' }, 5], fetchUsers);
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Nested function calls with raw arrays
+        queryClient.fetchQuery(['users'], () => {
+          queryClient.invalidateQueries(['settings']);
+        });
+      `,
+      errors: [
+        { messageId: "noRawQueryKeys" },
+        { messageId: "noRawQueryKeys" },
       ],
     },
   ],
