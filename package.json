@@ -1,0 +1,39 @@
+{
+  "name": "eslint-plugin-react-query-keys",
+  "version": "0.0.1",
+  "description": "ESLint plugin for React query keys, sticking to the query key factory pattern.",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "react-query",
+    "query-keys"
+  ],
+  "peerDependencies": {
+    "eslint": ">=9.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^22.13.5",
+    "@typescript-eslint/parser": "^8.24.1",
+    "@typescript-eslint/rule-tester": "^8.24.1",
+    "@typescript-eslint/utils": "^8.24.1",
+    "@vitest/coverage-v8": "^3.0.6",
+    "eslint": "^9.21.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.6"
+  }
+}
