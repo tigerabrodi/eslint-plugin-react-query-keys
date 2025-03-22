@@ -4,6 +4,8 @@ const QUERY_CLIENT_OBJ_NAME = "queryClient";
 
 const QUERY_KEY_PROPERTY_NAME = "queryKey";
 
+const MUTATION_KEY_PROPERTY_NAME = "mutationKey";
+
 export const noPlainQueryKeys = ESLintUtils.RuleCreator(
   (name) =>
     `https://github.com/yourusername/eslint-plugin-react-query-keys/blob/main/docs/rules/${name}.md`
@@ -91,7 +93,8 @@ export const noPlainQueryKeys = ESLintUtils.RuleCreator(
       Property(node) {
         if (
           node.key.type === "Identifier" &&
-          node.key.name === QUERY_KEY_PROPERTY_NAME
+          (node.key.name === QUERY_KEY_PROPERTY_NAME ||
+            node.key.name === MUTATION_KEY_PROPERTY_NAME)
         ) {
           if (node.value.type === "ArrayExpression") {
             context.report({
