@@ -63,7 +63,7 @@ useQuery({
 
 // ✅ Good (using query key factories)
 useQuery({
-  queryKey: userKeys.all,
+  queryKey: userKeys.list(),
   queryFn: fetchUsers,
 });
 
@@ -72,7 +72,7 @@ useQuery({
   queryFn: fetchUser,
 });
 
-queryClient.invalidateQueries(userKeys.all);
+queryClient.invalidateQueries(userKeys.list());
 ```
 
 See the [rule documentation](docs/rules/no-plain-query-keys.md) for more detailed examples and explanation.
