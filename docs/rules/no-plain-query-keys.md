@@ -61,7 +61,7 @@ useMutation({
 queryClient.setQueryData(userKeys.detail(1), data);
 
 // Using query key factory with multiple methods
-queryClient.getQueryData(userKeys.all);
+queryClient.getQueryData(userKeys.list());
 queryClient.invalidateQueries(userKeys.detail(5));
 queryClient.refetchQueries(todoKeys.list(userId));
 
