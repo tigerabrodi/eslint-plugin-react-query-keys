@@ -44,6 +44,33 @@ ruleTester.run("no-plain-query-keys", noPlainQueryKeys, {
         queryClient.invalidateQueries(createQueryKey('users', userId));
       `,
     },
+    {
+      code: `
+        // Using query key factory in useQuery is good
+        useQuery({
+          queryKey: userKeys.detail(1),
+          queryFn: fetchUser
+        });
+      `,
+    },
+    {
+      code: `
+        // Using query key factory in useInfiniteQuery is good
+        useInfiniteQuery({
+          queryKey: todoKeys.list(userId),
+          queryFn: fetchTodos
+        });
+      `,
+    },
+    {
+      code: `
+        // Using query key factory in useMutation is good
+        useMutation({
+          mutationKey: userKeys.mutations.update(),
+          mutationFn: updateUser
+        });
+      `,
+    },
   ],
   invalid: [
     {
@@ -105,6 +132,56 @@ ruleTester.run("no-plain-query-keys", noPlainQueryKeys, {
         { messageId: "noRawQueryKeys" },
         { messageId: "noRawQueryKeys" },
       ],
+    },
+    {
+      code: `
+        // Raw array as queryKey property in useQuery
+        useQuery({
+          queryKey: ['users'],
+          queryFn: fetchUsers
+        });
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Empty string in array as queryKey (should be invalid)
+        useQuery({
+          queryKey: [""],
+          queryFn: fetchData
+        });
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Empty array as queryKey (should be invalid)
+        useQuery({
+          queryKey: [],
+          queryFn: fetchData
+        });
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Raw array in useInfiniteQuery
+        useInfiniteQuery({
+          queryKey: ['todos', userId],
+          queryFn: fetchTodos
+        });
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Raw array in useMutation
+        useMutation({
+          mutationKey: ['updateUser'],
+          mutationFn: updateUser
+        });
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
     },
   ],
 });
