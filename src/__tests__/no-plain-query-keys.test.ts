@@ -71,6 +71,75 @@ ruleTester.run("no-plain-query-keys", noPlainQueryKeys, {
         });
       `,
     },
+    {
+      code: `
+        // Using a function call returning an array in useQuery queryKey
+        useQuery({
+          queryKey: jobsQueries.all(),
+          queryFn: fetchJobs
+        });
+      `,
+    },
+    {
+      code: `
+        // Using a function call returning array directly in invalidateQueries (v5 object syntax)
+        queryClient.invalidateQueries({ queryKey: jobsQueries.all() });
+      `,
+    },
+    {
+      code: `
+        // Using a member expression directly in invalidateQueries (v5 object syntax)
+        queryClient.invalidateQueries({ queryKey: jobsQueries.all });
+      `,
+    },
+    {
+      code: `
+        // Using queryOptions result directly in useQuery
+        const options = queryOptions({ queryKey: ['a'], queryFn });
+        useQuery(options);
+      `,
+    },
+    {
+      code: `
+        // Using queryOptions result directly in queryClient method
+        const options = queryOptions({ queryKey: ['a'], queryFn });
+        queryClient.prefetchQuery(options);
+      `,
+    },
+    {
+      code: `
+        // Accessing .queryKey from queryOptions result
+        const options = queryOptions({ queryKey: ['a'], queryFn });
+        queryClient.getQueryData(options.queryKey);
+      `,
+    },
+    {
+      code: `
+        // Using shorthand property where variable holds a factory member
+        const queryKey = jobsQueries.all;
+        queryClient.cancelQueries({ queryKey });
+      `,
+    },
+    {
+      code: `
+        // Using shorthand property where variable holds a factory call result
+        const queryKey = jobsQueries.all();
+        queryClient.cancelQueries({ queryKey });
+      `,
+    },
+    {
+      // Added to ensure simple CallExpressions (not MemberExpressions) are still allowed
+      // e.g., a helper function `createKey()` that isn't part of a factory object
+      code: `
+        queryClient.invalidateQueries(createKey('users'));
+      `,
+    },
+    {
+      // Ensure CallExpression returning options object is allowed
+      code: `
+        useQuery(createOptionsObject('users'));
+      `,
+    },
   ],
   invalid: [
     {
@@ -181,6 +250,30 @@ ruleTester.run("no-plain-query-keys", noPlainQueryKeys, {
           mutationFn: updateUser
         });
       `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Empty raw array in invalidateQueries (v5 object syntax)
+        queryClient.invalidateQueries({ queryKey: [] });
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Raw array in prefetchQuery (v5 object syntax)
+        queryClient.prefetchQuery({ queryKey: ['rawPrefetch'] });
+      `,
+      errors: [{ messageId: "noRawQueryKeys" }],
+    },
+    {
+      code: `
+        // Raw array in setQueryData (v5 object syntax - assuming it might exist)
+        queryClient.setQueryData({ queryKey: ['rawSet'], data: {} });
+      `,
+      // Note: setQueryData doesn't use object syntax for the key itself.
+      // Key is first arg, { data: ... } is second. Keep old tests.
+      // This test case is actually testing the Property rule on `queryKey: ['rawSet']`
       errors: [{ messageId: "noRawQueryKeys" }],
     },
   ],
