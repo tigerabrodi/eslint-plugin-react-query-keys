@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-react-query-keys",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "ESLint plugin for React query keys, sticking to the query key factory pattern.",
   "main": "dist/index.js",
   "files": [
